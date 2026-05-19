@@ -63,3 +63,198 @@ To ensure a secure server, the connection must be wrapped in an SSL/TLS encrypti
 ### Architecture Diagram
 ![Network Diagram](images/network_diagram-2026_05_19-mermaid.png)
 
+# STEPS: DAY 2
+
+## Installation of PostgreSQL and PgAdmin4
+
+We started by installing the PostgreSQL DBMS.
+
+To do this, we opened one of the virtual machines created the previous day, opened the terminal, and executed the following command:
+
+```bash
+apt install postgresql
+```
+
+Next, we configured the automated repository using the following commands:
+
+```bash
+sudo apt install -y postgresql-common
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+```
+
+After executing these commands, PostgreSQL was successfully installed and ready to use.
+
+Then, on the second virtual machine, we proceeded with the installation of the PgAdmin4 database administration tool.
+
+First, we installed the public key for the repository:
+
+```bash
+curl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /usr/share/keyrings/packages-pgadmin-org.gpg
+```
+
+Next, we created the repository configuration file:
+
+```bash
+sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/packages-pgadmin-org.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d'
+```
+
+Finally, we installed PgAdmin4:
+
+```bash
+sudo apt install pgadmin4-web
+```
+
+Since our installation was web-only, we also configured the web server:
+
+```bash
+sudo /usr/pgadmin4/bin/setup-web.sh
+```
+
+---
+
+# Functional Requirements Definition
+
+Once the installations were completed, we started defining the functional requirements of our application.
+
+We analyzed the project needs and the tasks each part of the system had to perform. Based on this analysis, we identified the main functionalities required for the application.
+
+We defined how products would be stored in the database and how this information would be automatically obtained using a Python scraping program that extracts products from different websites. We also organized the server and virtual machine configuration required for the application to work correctly.
+
+Additionally, we designed the HTML templates and CSS styles for the visual part of the application and used GitHub to organize teamwork, manage changes, and document the project.
+
+Finally, we developed an AI skill capable of receiving an online store URL and automatically generating a JSON file compatible with our project. During this process, we continuously improved and documented the results to achieve greater accuracy and robustness.
+
+---
+
+# Relational Model of the Database
+
+To obtain the relational model of our database, we first analyzed the information the application needed to manage and the relationships between the different data elements.
+
+Based on the previously defined functional requirements, we identified the main entities of the system.
+
+Then, we organized this information into PostgreSQL tables, defining the necessary fields for each one and establishing relationships between them. This allowed us to structure the data in an organized way.
+
+We also reviewed how the different application modules interacted with the database to ensure that the model covered the project requirements and facilitated both data storage and querying of the information obtained through scraping.
+
+---
+
+# PostgreSQL Database Creation Using PgAdmin4
+
+To define and create our PostgreSQL database, we used PgAdmin4.
+
+First, we installed PostgreSQL and PgAdmin4 on the virtual machine configured for the project. Once the server was running, we accessed PgAdmin4 and created a new database from the administration panel.
+
+Next, we defined the required tables according to the relational model we had previously designed. For each table, we established its columns, data types, and relationships.
+
+Although many operations were performed through the PgAdmin4 graphical interface, we also used SQL queries to create tables and relationships more precisely.
+
+## Database Structure
+
+### Game Table
+
+```sql
+CREATE TABLE Game (
+    game_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    release_date DATE,
+    rating NUMERIC(3,2),
+    background_image VARCHAR(512)
+);
+```
+
+This table stores the main information about video games obtained from the RAWG API.
+
+---
+
+### Store Table
+
+```sql
+CREATE TABLE Store (
+    store_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    base_url VARCHAR(255)
+);
+```
+
+This table stores information about digital stores obtained from the CheapShark API.
+
+---
+
+### Genre Table
+
+```sql
+CREATE TABLE Genre (
+    genre_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100)
+);
+```
+
+This table stores the different game genres from the RAWG API.
+
+---
+
+### Game_Genre Table
+
+```sql
+CREATE TABLE Game_Genre (
+    game_id INT REFERENCES Game(game_id) ON DELETE CASCADE,
+    genre_id INT REFERENCES Genre(genre_id) ON DELETE CASCADE,
+    PRIMARY KEY (game_id, genre_id)
+);
+```
+
+This bridge table manages the many-to-many relationship between games and genres.
+
+---
+
+### Deal Table
+
+```sql
+CREATE TABLE Deal (
+    deal_id VARCHAR(100) PRIMARY KEY,
+    game_id INT REFERENCES Game(game_id) ON DELETE CASCADE,
+    store_id INT REFERENCES Store(store_id) ON DELETE CASCADE,
+    price NUMERIC(6,2) NOT NULL,
+    retail_price NUMERIC(6,2),
+    savings NUMERIC(5,2),
+    purchase_url TEXT
+);
+```
+
+This table stores real-time pricing, discounts, and purchase links from the CheapShark API.
+
+---
+
+Finally, we verified that all tables and relationships worked correctly. This prepared the database so that our Python application could automatically store and manage the information extracted from external APIs.
+
+---
+
+# Network Configuration Between Virtual Machines
+
+Finally, we configured the network between the virtual machines containing the PostgreSQL database and the web server to allow communication between both systems.
+
+For this, we used VirtualBox to create and manage the project virtual machines.
+
+First, we configured the network adapters of each virtual machine using either an internal network or a NAT network with a host-only adapter so that both machines could communicate within the same virtual environment.
+
+Then, we tested the connectivity between them using the following command:
+
+```bash
+ping SERVER_IP
+```
+
+Once the connection was established, we configured PostgreSQL to accept remote connections from the web server virtual machine.
+
+To do this, we modified the `postgresql.conf` file with the following configuration:
+
+```conf
+listen_addresses = '*'
+```
+
+Finally, we restarted the PostgreSQL service and verified that the web server could successfully connect to the database using the IP address of the virtual machine hosting it.
+
+With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
+```
+
