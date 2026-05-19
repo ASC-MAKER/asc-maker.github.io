@@ -146,8 +146,6 @@ First, we installed PostgreSQL and PgAdmin4 on the virtual machine configured fo
 
 Next, we defined the required tables according to the relational model we had previously designed. For each table, we established its columns, data types, and relationships.
 
-Although many operations were performed through the PgAdmin4 graphical interface, we also used SQL queries to create tables and relationships more precisely.
-
 ## Database Structure
 
 ### Game Table
