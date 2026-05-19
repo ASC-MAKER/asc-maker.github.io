@@ -256,5 +256,4 @@ listen_addresses = '*'
 Finally, we restarted the PostgreSQL service and verified that the web server could successfully connect to the database using the IP address of the virtual machine hosting it.
 
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
-```
 
