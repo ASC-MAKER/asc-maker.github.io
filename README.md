@@ -255,20 +255,7 @@ Finally, we restarted the PostgreSQL service and verified that the web server co
 
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
 
-# Practice Session - Web Scraping, Database and Web Server Deployment
-
-## Previous Requirements Completed
-
-Before starting today's session, the following tasks were completed:
-
-- Product selected for sale.
-- Product attributes defined:
-  - Name
-  - Description
-  - Image
-  - Price
-- Linux Mint virtual machine created to host the database.
-- Database installed and configured.
+## STEPS: DAY 3
 
 ---
 
