@@ -523,32 +523,6 @@ http://YOUR_VM_IP
 ```
 
 ---
-
-# Final Result
-
-At the end of this session, the following objectives were achieved:
-
-- Nginx web server installed and configured.
-- Database running successfully.
-- Python scraping application implemented.
-- Product data stored in the database.
-- Python web population application implemented.
-- Dynamic product content displayed on the website.
-- Complete documentation published on GitHub Pages.
-
----
-
-# Future Improvements
-
-- Automate scraping using cron jobs.
-- Implement product filtering and search functionality.
-- Improve website responsiveness.
-- Add advanced logging and error handling.
-- Schedule automatic product updates.
-- Implement user-friendly product management features.
-
----
-
 # Conclusion
 
 This session focused on integrating web scraping, database management, and web deployment into a complete workflow. Product information is automatically collected from external websites, stored in a database, and displayed on a web page hosted through Nginx, creating a fully functional data pipeline.
