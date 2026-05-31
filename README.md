@@ -255,3 +255,313 @@ Finally, we restarted the PostgreSQL service and verified that the web server co
 
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
 
+# Practice Session - Web Scraping, Database and Web Server Deployment
+
+## Previous Requirements Completed
+
+Before starting today's session, the following tasks were completed:
+
+- Product selected for sale.
+- Product attributes defined:
+  - Name
+  - Description
+  - Image
+  - Price
+- Linux Mint virtual machine created to host the database.
+- Database installed and configured.
+
+---
+
+# Today's Objectives
+
+The goal of this session is to:
+
+1. Install and configure the Nginx web server.
+2. Develop a Python scraping application to collect product data.
+3. Store scraped data in the database.
+4. Develop a Python application to read data from the database.
+5. Populate the website dynamically using the stored data.
+6. Document the entire process in GitHub Pages.
+
+---
+
+# 1. Nginx Installation and Configuration
+
+## Update the System
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+## Install Nginx
+
+```bash
+sudo apt install nginx -y
+```
+
+## Verify Installation
+
+```bash
+sudo systemctl status nginx
+```
+
+## Enable Nginx at Startup
+
+```bash
+sudo systemctl enable nginx
+```
+
+## Test the Web Server
+
+Open a browser and navigate to:
+
+```text
+http://YOUR_VM_IP
+```
+
+The default Nginx welcome page should appear.
+
+---
+
+# 2. Project Structure
+
+Created a directory structure to organize the project components.
+
+```text
+project/
+│
+├── scraping/
+│   ├── src/
+│   ├── logs/
+│   └── requirements.txt
+│
+├── webapp/
+│   ├── src/
+│   ├── templates/
+│   ├── static/
+│   └── requirements.txt
+│
+└── docs/
+```
+
+---
+
+# 3. Python Environment Setup
+
+## Create Virtual Environment
+
+```bash
+python3 -m venv venv
+```
+
+## Activate Virtual Environment
+
+```bash
+source venv/bin/activate
+```
+
+## Install Required Libraries
+
+```bash
+pip install requests
+pip install beautifulsoup4
+pip install selenium
+pip install mysql-connector-python
+```
+
+## Save Dependencies
+
+```bash
+pip freeze > requirements.txt
+```
+
+---
+
+# 4. Scraping Application
+
+## Objective
+
+Develop a Python application capable of:
+
+- Accessing selected websites.
+- Extracting product information.
+- Storing extracted data in the database.
+
+---
+
+## Technologies Used
+
+### Requests
+
+Used to perform HTTP requests.
+
+```python
+import requests
+
+response = requests.get(url)
+html = response.text
+```
+
+### Beautiful Soup
+
+Used for HTML parsing and data extraction.
+
+```python
+from bs4 import BeautifulSoup
+
+soup = BeautifulSoup(html, "html.parser")
+```
+
+### Selenium
+
+Used for websites that load content dynamically using JavaScript.
+
+```python
+from selenium import webdriver
+
+driver = webdriver.Chrome()
+driver.get(url)
+```
+
+---
+
+## Product Data Collected
+
+The scraper extracts the following information:
+
+- Product Name
+- Product Description
+- Product Image
+- Product Price
+
+---
+
+## Database Storage
+
+### Database Table Structure
+
+```sql
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    description TEXT,
+    image VARCHAR(500),
+    price DECIMAL(10,2)
+);
+```
+
+### Insert Product Data
+
+```python
+cursor.execute(
+    """
+    INSERT INTO products
+    (name, description, image, price)
+    VALUES (%s, %s, %s, %s)
+    """,
+    (name, description, image, price)
+)
+```
+
+---
+
+## Scraping Workflow
+
+1. Send request to target website.
+2. Download page content.
+3. Parse HTML content.
+4. Locate product elements.
+5. Extract product information.
+6. Save data into the database.
+7. Log errors if any occur.
+
+---
+
+# 5. Website Population Application
+
+## Objective
+
+Develop a Python application that:
+
+- Reads product data from the database.
+- Generates HTML content dynamically.
+- Displays products on the website hosted by Nginx.
+
+---
+
+## Reading Data from the Database
+
+### SQL Query
+
+```sql
+SELECT * FROM products;
+```
+
+### Fetch Results
+
+```python
+products = cursor.fetchall()
+```
+
+---
+
+## HTML Generation
+
+For each product, a product card is generated.
+
+```html
+<div class="product">
+    <img src="image.jpg" alt="Product Image">
+    <h2>Product Name</h2>
+    <p>Product Description</p>
+    <span>$19.99</span>
+</div>
+```
+
+---
+
+## Deploying to Nginx
+
+Copy the generated files to the Nginx web root directory.
+
+```bash
+sudo cp index.html /var/www/html/
+```
+
+Verify deployment by opening:
+
+```text
+http://YOUR_VM_IP
+```
+
+---
+
+# Final Result
+
+At the end of this session, the following objectives were achieved:
+
+- Nginx web server installed and configured.
+- Database running successfully.
+- Python scraping application implemented.
+- Product data stored in the database.
+- Python web population application implemented.
+- Dynamic product content displayed on the website.
+- Complete documentation published on GitHub Pages.
+
+---
+
+# Future Improvements
+
+- Automate scraping using cron jobs.
+- Implement product filtering and search functionality.
+- Improve website responsiveness.
+- Add advanced logging and error handling.
+- Schedule automatic product updates.
+- Implement user-friendly product management features.
+
+---
+
+# Conclusion
+
+This session focused on integrating web scraping, database management, and web deployment into a complete workflow. Product information is automatically collected from external websites, stored in a database, and displayed on a web page hosted through Nginx, creating a fully functional data pipeline.
