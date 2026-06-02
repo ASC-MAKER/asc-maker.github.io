@@ -63,9 +63,9 @@ To ensure a secure server, the connection must be wrapped in an SSL/TLS encrypti
 ### Architecture Diagram
 ![Network Diagram](images/network_diagram-2026_05_19-mermaid.png)
 
-# STEPS: DAY 2
+## STEPS: DAY 2
 
-## Installation of PostgreSQL and PgAdmin4
+### Installation of PostgreSQL and PgAdmin4
 
 We started by installing the PostgreSQL DBMS.
 
@@ -126,7 +126,7 @@ Finally, we developed an AI skill capable of receiving an online store URL and a
 
 ---
 
-# Relational Model of the Database
+### Relational Model of the Database
 
 To obtain the relational model of our database, we first analyzed the information the application needed to manage and the relationships between the different data elements.
 
@@ -138,7 +138,7 @@ We also reviewed how the different application modules interacted with the datab
 
 ---
 
-# PostgreSQL Database Creation Using PgAdmin4
+### PostgreSQL Database Creation Using PgAdmin4
 
 To define and create our PostgreSQL database, we used PgAdmin4.
 
@@ -146,9 +146,9 @@ First, we installed PostgreSQL and PgAdmin4 on the virtual machine configured fo
 
 Next, we defined the required tables according to the relational model we had previously designed. For each table, we established its columns, data types, and relationships.
 
-## Database Structure
+### Database Structure
 
-### Game Table
+#### Game Table
 
 ```sql
 CREATE TABLE Game (
@@ -165,7 +165,7 @@ This table stores the main information about video games obtained from the RAWG 
 
 ---
 
-### Store Table
+#### Store Table
 
 ```sql
 CREATE TABLE Store (
@@ -179,7 +179,7 @@ This table stores information about digital stores obtained from the CheapShark 
 
 ---
 
-### Genre Table
+#### Genre Table
 
 ```sql
 CREATE TABLE Genre (
@@ -193,7 +193,7 @@ This table stores the different game genres from the RAWG API.
 
 ---
 
-### Game_Genre Table
+#### Game_Genre Table
 
 ```sql
 CREATE TABLE Game_Genre (
@@ -207,7 +207,7 @@ This bridge table manages the many-to-many relationship between games and genres
 
 ---
 
-### Deal Table
+#### Deal Table
 
 ```sql
 CREATE TABLE Deal (
@@ -229,7 +229,7 @@ Finally, we verified that all tables and relationships worked correctly. This pr
 
 ---
 
-# Network Configuration Between Virtual Machines
+### Network Configuration Between Virtual Machines
 
 Finally, we configured the network between the virtual machines containing the PostgreSQL database and the web server to allow communication between both systems.
 
@@ -256,273 +256,3 @@ Finally, we restarted the PostgreSQL service and verified that the web server co
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
 
 ## STEPS: DAY 3
-
----
-
-# Today's Objectives
-
-The goal of this session is to:
-
-1. Install and configure the Nginx web server.
-2. Develop a Python scraping application to collect product data.
-3. Store scraped data in the database.
-4. Develop a Python application to read data from the database.
-5. Populate the website dynamically using the stored data.
-6. Document the entire process in GitHub Pages.
-
----
-
-# 1. Nginx Installation and Configuration
-
-## Update the System
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
-
-## Install Nginx
-
-```bash
-sudo apt install nginx -y
-```
-
-## Verify Installation
-
-```bash
-sudo systemctl status nginx
-```
-
-## Enable Nginx at Startup
-
-```bash
-sudo systemctl enable nginx
-```
-
-## Test the Web Server
-
-Open a browser and navigate to:
-
-```text
-http://YOUR_VM_IP
-```
-
-The default Nginx welcome page should appear.
-
----
-
-# 2. Project Structure
-
-Created a directory structure to organize the project components.
-
-```text
-project/
-│
-├── scraping/
-│   ├── src/
-│   ├── logs/
-│   └── requirements.txt
-│
-├── webapp/
-│   ├── src/
-│   ├── templates/
-│   ├── static/
-│   └── requirements.txt
-│
-└── docs/
-```
-
----
-
-# 3. Python Environment Setup
-
-## Create Virtual Environment
-
-```bash
-python3 -m venv venv
-```
-
-## Activate Virtual Environment
-
-```bash
-source venv/bin/activate
-```
-
-## Install Required Libraries
-
-```bash
-pip install requests
-pip install beautifulsoup4
-pip install selenium
-pip install mysql-connector-python
-```
-
-## Save Dependencies
-
-```bash
-pip freeze > requirements.txt
-```
-
----
-
-# 4. Scraping Application
-
-## Objective
-
-Develop a Python application capable of:
-
-- Accessing selected websites.
-- Extracting product information.
-- Storing extracted data in the database.
-
----
-
-## Technologies Used
-
-### Requests
-
-Used to perform HTTP requests.
-
-```python
-import requests
-
-response = requests.get(url)
-html = response.text
-```
-
-### Beautiful Soup
-
-Used for HTML parsing and data extraction.
-
-```python
-from bs4 import BeautifulSoup
-
-soup = BeautifulSoup(html, "html.parser")
-```
-
-### Selenium
-
-Used for websites that load content dynamically using JavaScript.
-
-```python
-from selenium import webdriver
-
-driver = webdriver.Chrome()
-driver.get(url)
-```
-
----
-
-## Product Data Collected
-
-The scraper extracts the following information:
-
-- Product Name
-- Product Description
-- Product Image
-- Product Price
-
----
-
-## Database Storage
-
-### Database Table Structure
-
-```sql
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
-    description TEXT,
-    image VARCHAR(500),
-    price DECIMAL(10,2)
-);
-```
-
-### Insert Product Data
-
-```python
-cursor.execute(
-    """
-    INSERT INTO products
-    (name, description, image, price)
-    VALUES (%s, %s, %s, %s)
-    """,
-    (name, description, image, price)
-)
-```
-
----
-
-## Scraping Workflow
-
-1. Send request to target website.
-2. Download page content.
-3. Parse HTML content.
-4. Locate product elements.
-5. Extract product information.
-6. Save data into the database.
-7. Log errors if any occur.
-
----
-
-# 5. Website Population Application
-
-## Objective
-
-Develop a Python application that:
-
-- Reads product data from the database.
-- Generates HTML content dynamically.
-- Displays products on the website hosted by Nginx.
-
----
-
-## Reading Data from the Database
-
-### SQL Query
-
-```sql
-SELECT * FROM products;
-```
-
-### Fetch Results
-
-```python
-products = cursor.fetchall()
-```
-
----
-
-## HTML Generation
-
-For each product, a product card is generated.
-
-```html
-<div class="product">
-    <img src="image.jpg" alt="Product Image">
-    <h2>Product Name</h2>
-    <p>Product Description</p>
-    <span>$19.99</span>
-</div>
-```
-
----
-
-## Deploying to Nginx
-
-Copy the generated files to the Nginx web root directory.
-
-```bash
-sudo cp index.html /var/www/html/
-```
-
-Verify deployment by opening:
-
-```text
-http://YOUR_VM_IP
-```
-
----
-# Conclusion
-
-This session focused on integrating web scraping, database management, and web deployment into a complete workflow. Product information is automatically collected from external websites, stored in a database, and displayed on a web page hosted through Nginx, creating a fully functional data pipeline.
