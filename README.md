@@ -256,3 +256,99 @@ Finally, we restarted the PostgreSQL service and verified that the web server co
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
 
 ## STEPS: DAY 3
+
+> ⚠️ **READ ALL POINTS BEFORE DOING ANYTHING ELSE**
+
+## 📋 Prerequisites
+To move forward today, you must have completed the following from the previous session:
+* Selected the product to sell.
+* Defined the parameters that describe your product (name, description, image, and price).
+* Created the virtual machine with LinuxMint OS to host the database.
+* Installed and configured the database.
+
+---
+
+## 🚀 Today is the big day!
+
+We are going to scrape your chosen target pages using a Python program. We will also read from the database to populate the HTML.
+
+### Remember! This involves two steps:
+1. A program to scrape data and save it to the database.
+2. A program to read from the database and populate the HTML.
+
+> 💡 **Note:** Before doing this, we must set up the Nginx web server to host the website.
+
+Let's get to work! ⚒ and...
+
+📢 **!!! REMEMBER TO DOCUMENT THE ENTIRE PROCESS ON YOUR GITHUB SO THAT IT IS VISIBLE ON GITHUB PAGES !!!**
+
+---
+
+## 🛠️ Step-by-Step: Today's Session
+
+### 1. Web Server
+* Install and configure the Nginx web server on the VM you created for this purpose. Go ahead!
+
+### 2. Introduction to Scraping
+Let's move on to scraping... get familiar with the following tools:
+* **Requests:** To make HTTP requests to the web pages.
+* **Beautiful Soup:** To parse (extract) data from HTML.
+* **Selenium:** To handle pages with dynamic interaction (like JavaScript).
+
+### 3. Python Development
+Now we will create **2 Python applications**. Create the necessary folder structure to develop both applications:
+
+#### A. Scraping Application
+* Using the knowledge gained from Requests, Beautiful Soup, and Selenium, create a Python application that retrieves your desired products from the websites you chose at the beginning.
+* The data will be stored in the database.
+
+#### B. HTML Population Application
+* Create a Python application that reads from the database and populates the website hosted on Nginx.
+
+---
+
+## 📦 DELIVERY
+
+Create a **PDF** containing evidence of:
+* Nginx configuration.
+* URLs with links to the repositories where the code for both Python applications can be reviewed.
+* URL of the documentation.
+* Screenshots of your website showing the products.
+
+---
+---
+## STEPS: DAY 4
+
+> ⚠️ **READ ALL POINTS BEFORE DOING ANYTHING ELSE**
+
+## 📋 Prerequisites
+To move forward today, you must have completed the following from the previous session:
+* Selected the product to sell.
+* Defined the parameters that describe your product (name, description, image, and price).
+* Created the virtual machine with LinuxMint OS to host the database.
+* Installed and configured the database.
+* Developed the Python web scraping application and saved the data to the database.
+* Developed the application to read from the database and populate the HTML.
+
+> 📝 **NOTE:** Apparently, during the last session, not all groups had enough time to finish the application that reads the database and populates your website.
+> 
+> I have opened "Day 27 Assignment" so you can replace your submitted work. This ensures the assignment has both complete scripts so the Rubric can be applied correctly.
+> 
+> **Great! Finish this part before moving on.**
+
+---
+
+## 🤖 Today's Challenge: Can AI Help Us?
+
+At this point... do you think AI could have helped us with scraping? **Watch out!** Not by writing the Python code, but by doing the scraping for you and saving the data into a JSON file. Let's do it!
+
+### 🗓️ Daily Schedule (2 Sessions)
+
+#### Session 1: Scraping with AI (Prompt Engineering)
+* **Objective:** Write a prompt to make the AI scrape your target website and save the data into a JSON file.
+* **Process:** Iterate and improve the prompt until the AI populates the JSON exactly as you expect.
+* **Delivery:** Upload the prompt as a `.md` file and the resulting JSON file to the assignment portal.
+
+#### Session 2: Design and Style
+* **Objective:** Continue developing the HTML and apply CSS styling to your web store.
+
