@@ -5,9 +5,8 @@ This project has been created to improve our web development skills.
 ### Products To Sell / Theme
 - **VIDEOGAMES**
 
-### Product's APIs ([RAWG](https://rawg.io) & [CheapShark](https://cheapshark.com))
-We have selected a **dual-API strategy** to meet our project requirements:
-- **RAWG API:** Used as the primary source for **metadata**. It provides access to over 500,000+ games, including high-quality **images (backgrounds and screenshots)**, detailed descriptions, genres, and platform compatibility.
+### Product's API [CheapShark](https://cheapshark.com))
+We have selected a **single-API strategy** to meet our project requirements:
 - **CheapShark API:** Used specifically for **real-time pricing and deals**. Since RAWG does not provide live prices, CheapShark fills this gap by offering updated costs and purchase links for PC games across multiple stores.
 
 ### Doc Research
@@ -24,12 +23,6 @@ API fetching consists of making direct HTTP requests to server endpoints to obta
   - **Send Request:** Use `requests.get(url)` to fetch the response from both APIs.
   - **Process JSON:** Convert the text response into a Python dictionary using `response.json()`.
   - **Data Merging:** Cross-reference the results (usually by matching the game title) to combine RAWG images with CheapShark prices into a single object.
-
-#### 2. JSON Storage
-To persist the collected data, we use the `json` module to write files to the local disk. This is essential for **Static Site Generation (SSG)**, as the site will be built using these pre-fetched files.
-
-- **Method `json.dump()`:** Allows writing a Python object (dictionary or list) directly into a `.json` file.
-- **Organization:** Store games in an array format to easily iterate through them during the site build process.
 
 #### 3. Secure Server Implementation (HTTPS)
 To ensure a secure server, the connection must be wrapped in an SSL/TLS encryption layer.
@@ -256,66 +249,6 @@ Finally, we restarted the PostgreSQL service and verified that the web server co
 With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
 
 ## STEPS: DAY 3
-
-> ⚠️ **READ ALL POINTS BEFORE DOING ANYTHING ELSE**
-
-## 📋 Prerequisites
-To move forward today, you must have completed the following from the previous session:
-* Selected the product to sell.
-* Defined the parameters that describe your product (name, description, image, and price).
-* Created the virtual machine with LinuxMint OS to host the database.
-* Installed and configured the database.
-
----
-
-## 🚀 Today is the big day!
-
-We are going to scrape your chosen target pages using a Python program. We will also read from the database to populate the HTML.
-
-### Remember! This involves two steps:
-1. A program to scrape data and save it to the database.
-2. A program to read from the database and populate the HTML.
-
-> 💡 **Note:** Before doing this, we must set up the Nginx web server to host the website.
-
-Let's get to work! ⚒ and...
-
-📢 **!!! REMEMBER TO DOCUMENT THE ENTIRE PROCESS ON YOUR GITHUB SO THAT IT IS VISIBLE ON GITHUB PAGES !!!**
-
----
-
-## 🛠️ Step-by-Step: Today's Session
-
-### 1. Web Server
-* Install and configure the Nginx web server on the VM you created for this purpose. Go ahead!
-
-### 2. Introduction to Scraping
-Let's move on to scraping... get familiar with the following tools:
-* **Requests:** To make HTTP requests to the web pages.
-* **Beautiful Soup:** To parse (extract) data from HTML.
-* **Selenium:** To handle pages with dynamic interaction (like JavaScript).
-
-### 3. Python Development
-Now we will create **2 Python applications**. Create the necessary folder structure to develop both applications:
-
-#### A. Scraping Application
-* Using the knowledge gained from Requests, Beautiful Soup, and Selenium, create a Python application that retrieves your desired products from the websites you chose at the beginning.
-* The data will be stored in the database.
-
-#### B. HTML Population Application
-* Create a Python application that reads from the database and populates the website hosted on Nginx.
-
----
-
-## 📦 DELIVERY
-
-Create a **PDF** containing evidence of:
-* Nginx configuration.
-* URLs with links to the repositories where the code for both Python applications can be reviewed.
-* URL of the documentation.
-* Screenshots of your website showing the products.
-
----
 ---
 ## STEPS: DAY 4
 
