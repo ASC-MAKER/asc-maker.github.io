@@ -1,354 +1,323 @@
-# CHALLENGES-BASED WEB PROJECT | STATIC SITE GENERATION 
-This project has been created to improve our web development skills.
+# GameDrop // Video Game Deal Aggregator & Static Site Engine
 
-## STEPS: DAY 1
-### Products To Sell / Theme
-- **VIDEOGAMES**
-
-### Product's APIs ([RAWG](https://rawg.io) & [CheapShark](https://cheapshark.com))
-We have selected a **dual-API strategy** to meet our project requirements:
-- **RAWG API:** Used as the primary source for **metadata**. It provides access to over 500,000+ games, including high-quality **images (backgrounds and screenshots)**, detailed descriptions, genres, and platform compatibility.
-- **CheapShark API:** Used specifically for **real-time pricing and deals**. Since RAWG does not provide live prices, CheapShark fills this gap by offering updated costs and purchase links for PC games across multiple stores.
-
-### Doc Research
-
-#### 1. API Fetching (Scraping) with Python
-API fetching consists of making direct HTTP requests to server endpoints to obtain structured data.
-
-- **Main Libraries:**
-  - `requests`: The standard tool for sending `GET` and `POST` requests.
-  - `json`: Native library to process and save the data.
-        
-- **Workflow:**
-  - **Identify Endpoints:** Get the **API Key** by registering at [RAWG](https://rawg.io). CheapShark does not require a key.
-  - **Send Request:** Use `requests.get(url)` to fetch the response from both APIs.
-  - **Process JSON:** Convert the text response into a Python dictionary using `response.json()`.
-  - **Data Merging:** Cross-reference the results (usually by matching the game title) to combine RAWG images with CheapShark prices into a single object.
-
-#### 2. JSON Storage
-To persist the collected data, we use the `json` module to write files to the local disk. This is essential for **Static Site Generation (SSG)**, as the site will be built using these pre-fetched files.
-
-- **Method `json.dump()`:** Allows writing a Python object (dictionary or list) directly into a `.json` file.
-- **Organization:** Store games in an array format to easily iterate through them during the site build process.
-
-#### 3. Secure Server Implementation (HTTPS)
-To ensure a secure server, the connection must be wrapped in an SSL/TLS encryption layer.
-
-- **Requirements:** A certificate (`cert.pem`) and a private key (`key.pem`) are needed.
-- **Development:** Self-signed certificates can be generated with **OpenSSL**. In Python, this is implemented using `http.server` combined with the `ssl` module to wrap the socket.
-
-#### 4. Two-Factor Authentication (2FA)
-2FA adds a security layer where the user provides something they know (password) and something they have (a code on their mobile device).
-
-- **TOTP (Time-based One-Time Password):** The most common method (compatible with Google Authenticator).
-- **Recommended Library:** `PyOTP`.
-  - **Step 1:** Generate a **unique secret key** for the user.
-  - **Step 2:** Display a **QR Code** that the user scans with their authenticator app.
-  - **Step 3:** Verify the **6-digit code** entered by the user during login.
-
-### VMs Technical Specifications
-
-| Configuración | VM Servidor Web (SSG) | VM Base de Datos (PostgreSQL) |
-| :------------ | :-------------------- | :---------------------------- |
-| **Sistema Operativo** | Linux Mint (22.3) Xfce | Linux Mint (22.3) Xfce |
-| **Versión (VBox)** | Ubuntu (64-bit)| Ubuntu (64-bit) |
-| **Procesador (vCPU)** | 4 Cores | 4 Cores |
-| **Memoria RAM** | 4 GB | 8 GB |
-| **Disco Virtual** | 25 GB (Dynamic VDI) | 50 GB (Dynamic VDI) |
-| **Tipo de Red** | NAT (Internet) | Internal Net (Host-only) |
-| **Usuario Sistema** | `project_web` | `project_db` |
-| **Propósito de Red** | External Access/Internet | Data isolation and security |
-
-
-### Architecture Diagram
-![Network Diagram](images/network_diagram-2026_05_19-mermaid.png)
-
-## STEPS: DAY 2
-
-### Installation of PostgreSQL and PgAdmin4
-
-We started by installing the PostgreSQL DBMS.
-
-To do this, we opened one of the virtual machines created the previous day, opened the terminal, and executed the following command:
-
-```bash
-apt install postgresql
-```
-
-Next, we configured the automated repository using the following commands:
-
-```bash
-sudo apt install -y postgresql-common
-sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-```
-
-After executing these commands, PostgreSQL was successfully installed and ready to use.
-
-Then, on the second virtual machine, we proceeded with the installation of the PgAdmin4 database administration tool.
-
-First, we installed the public key for the repository:
-
-```bash
-curl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /usr/share/keyrings/packages-pgadmin-org.gpg
-```
-
-Next, we created the repository configuration file:
-
-```bash
-sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/packages-pgadmin-org.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d'
-```
-
-Finally, we installed PgAdmin4:
-
-```bash
-sudo apt install pgadmin4-web
-```
-
-Since our installation was web-only, we also configured the web server:
-
-```bash
-sudo /usr/pgadmin4/bin/setup-web.sh
-```
+An ultra-high-performance, database-driven video game discount aggregation platform. The project synchronizes live e-commerce discount pipelines via external APIs, structures records within a secure relational database engine, and compiles highly optimized static build artifacts served through an enterprise web server network architecture.
 
 ---
 
-# Functional Requirements Definition
-
-Once the installations were completed, we started defining the functional requirements of our application.
-
-We analyzed the project needs and the tasks each part of the system had to perform. Based on this analysis, we identified the main functionalities required for the application.
-
-We defined how products would be stored in the database and how this information would be automatically obtained using a Python scraping program that extracts products from different websites. We also organized the server and virtual machine configuration required for the application to work correctly.
-
-Additionally, we designed the HTML templates and CSS styles for the visual part of the application and used GitHub to organize teamwork, manage changes, and document the project.
-
-Finally, we developed an AI skill capable of receiving an online store URL and automatically generating a JSON file compatible with our project. During this process, we continuously improved and documented the results to achieve greater accuracy and robustness.
+## 🎓 Academic Attribution & Project Context
+* **Institution:** IES Puerto de la Cruz
+* **Educational Program:** 1ºDAW (Formación Profesional de Grado Superior - Desarrollo de Aplicaciones Web)
+* **Project Nature:** Challenges-Based Web Engineering Assignment (Static Site Generation Pipeline)
+* **Virtualization Host Environment:** LinuxMint OS Virtual Machine running inside VirtualBox
 
 ---
 
-### Relational Model of the Database
+## 🛠️ System Architecture & Workflow
 
-To obtain the relational model of our database, we first analyzed the information the application needed to manage and the relationships between the different data elements.
+The platform utilizes a structured **Static Site Generation (SSG)** paradigm to isolate intensive database processing and external API latency from end-user browsing experiences.
 
-Based on the previously defined functional requirements, we identified the main entities of the system.
+```
+┌──────────────────┐       ┌─────────────────┐       ┌─────────────────────┐
+│  CheapShark API  │ ───>  │   PostgreSQL    │ ───>  │ Static Site Builder │
+│  (Real-time PC   │       │   Database DB   │       │   (build_site.py)   │
+│   Deal Feeds)    │       │ (asc_videogames)│       └──────────┬──────────┘
+└──────────────────┘       └─────────────────┘                  │
+                                                                ▼
+┌──────────────────┐       ┌─────────────────┐       ┌─────────────────────┐
+│   End-User Web   │ <───  │ Apache Server   │ <───  │ Production Assets   │
+│  Browsing View   │       │ (/var/www/html) │       │ (index.html/json)   │
+└──────────────────┘       └─────────────────┘       └─────────────────────┘
+```
 
-Then, we organized this information into PostgreSQL tables, defining the necessary fields for each one and establishing relationships between them. This allowed us to structure the data in an organized way.
-
-We also reviewed how the different application modules interacted with the database to ensure that the model covered the project requirements and facilitated both data storage and querying of the information obtained through scraping.
+1. **Ingestion Layer (`fetch_deals.py`):** Communicates with external endpoints, synchronizes active global digital merchant profiles, structures item listings, tracking identifiers, and price drops inside the operational data store.
+2. **Persistence Layer (`db_context.py`):** Manages high-velocity connection resource pooling via context-managed cursors, maintaining complete transaction insulation across updates.
+3. **Compilation Engine (`build_site.py`):** Relocation architecture that compiles active relational records into a highly compressed, cacheable JSON object array target and synchronizes structural assets into web directory configurations.
+4. **Presentation Engine (`base.html` & `styles.css`):** An accelerated, highly responsive grid view running a lightweight DOM virtualization system to manage large catalog arrays with sub-millisecond execution speeds.
 
 ---
 
-### PostgreSQL Database Creation Using PgAdmin4
+## 🗄️ Relational Database Schema (PostgreSQL)
 
-To define and create our PostgreSQL database, we used PgAdmin4.
-
-First, we installed PostgreSQL and PgAdmin4 on the virtual machine configured for the project. Once the server was running, we accessed PgAdmin4 and created a new database from the administration panel.
-
-Next, we defined the required tables according to the relational model we had previously designed. For each table, we established its columns, data types, and relationships.
-
-### Database Structure
-
-#### Game Table
+The persistence layer is mapped out in PostgreSQL inside the designated host system. Execute the following SQL schema commands within the `asc_videogames_db` instance to allocate the target relational structures:
 
 ```sql
-CREATE TABLE Game (
-    game_id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    release_date DATE,
-    rating NUMERIC(3,2),
-    background_image VARCHAR(512)
-);
-```
-
-This table stores the main information about video games obtained from the RAWG API.
-
----
-
-#### Store Table
-
-```sql
+-- 1. Store Directory Lookups
 CREATE TABLE Store (
     store_id INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    base_url VARCHAR(255)
+    base_url VARCHAR(255) NOT NULL
 );
-```
 
-This table stores information about digital stores obtained from the CheapShark API.
-
----
-
-#### Genre Table
-
-```sql
-CREATE TABLE Genre (
-    genre_id INT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    slug VARCHAR(100)
+-- 2. Game Metadata Catalogs
+CREATE TABLE Game (
+    game_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    background_image TEXT,
+    rating NUMERIC(5,2) DEFAULT 0.00
 );
-```
 
-This table stores the different game genres from the RAWG API.
-
----
-
-#### Game_Genre Table
-
-```sql
-CREATE TABLE Game_Genre (
-    game_id INT REFERENCES Game(game_id) ON DELETE CASCADE,
-    genre_id INT REFERENCES Genre(genre_id) ON DELETE CASCADE,
-    PRIMARY KEY (game_id, genre_id)
-);
-```
-
-This bridge table manages the many-to-many relationship between games and genres.
-
----
-
-#### Deal Table
-
-```sql
+-- 3. Dynamic Deal Mapping Contracts
 CREATE TABLE Deal (
     deal_id VARCHAR(100) PRIMARY KEY,
     game_id INT REFERENCES Game(game_id) ON DELETE CASCADE,
     store_id INT REFERENCES Store(store_id) ON DELETE CASCADE,
-    price NUMERIC(6,2) NOT NULL,
-    retail_price NUMERIC(6,2),
-    savings NUMERIC(5,2),
-    purchase_url TEXT
+    price NUMERIC(10,2) NOT NULL,
+    retail_price NUMERIC(10,2) NOT NULL,
+    savings NUMERIC(5,2) NOT NULL,
+    purchase_url TEXT NOT NULL
 );
+
+-- Allocation Indexes for High-Velocity Query Performance Optimization
+CREATE INDEX idx_deal_price ON Deal(price);
+CREATE INDEX idx_game_title ON Game(title);
 ```
 
-This table stores real-time pricing, discounts, and purchase links from the CheapShark API.
-
 ---
 
-Finally, we verified that all tables and relationships worked correctly. This prepared the database so that our Python application could automatically store and manage the information extracted from external APIs.
+## 💻 Configuration and Backend Mechanics
 
----
+System configurations are centralized within `config.py` to target specialized operational environments.
 
-### Network Configuration Between Virtual Machines
+### 1. Environmental Variable Matrix (`config.py`)
+```python
+DB_PARAMS = {
+    "host": "192.168.56.10",
+    "database": "asc_videogames_db",
+    "user": "postgres",
+    "password": "@Suricat0s2o26",
+    "port": 5432
+}
 
-Finally, we configured the network between the virtual machines containing the PostgreSQL database and the web server to allow communication between both systems.
+CHEAPSHARK_BASE_URL = "[https://cheapshark.com/api/1.0](https://cheapshark.com/api/1.0)"
+CHEAPSHARK_FILTERS = {
+    "storeID": "1",          # Target Store Context (e.g., 1 = Steam)
+    "upperPrice": "50",      # Max target price ceiling limit
+    "lowerPrice": "0",
+    "sortBy": "Savings",
+    "pageSize": "60"         # Max number permitted of deal records to fetch
+}
 
-For this, we used VirtualBox to create and manage the project virtual machines.
+APACHE_DIR = "/var/www/html"
+```
 
-First, we configured the network adapters of each virtual machine using either an internal network or a NAT network with a host-only adapter so that both machines could communicate within the same virtual environment.
-
-Then, we tested the connectivity between them using the following command:
+### 2. Manual System Execution Routine
+The compilation and synchronization commands must be run manually through the shell environment inside your project deployment directories:
 
 ```bash
-ping SERVER_IP
+# Step 1: Execute external data ingestion to sync structural database states
+python3 src/fetch_deals.py
+
+# Step 2: Compile relational database states down into optimized production target assets
+python3 src/build_site.py
 ```
 
-Once the connection was established, we configured PostgreSQL to accept remote connections from the web server virtual machine.
+---
 
-To do this, we modified the `postgresql.conf` file with the following configuration:
+## ⚡ High-Performance Client Architecture
 
-```conf
-listen_addresses = '*'
+The frontend layout avoids common rendering performance bottlenecks (such as scroll-linked layout thrashing, style recalculation jams, and visual layout shifts) by using a clean, hardware-accelerated static pipeline.
+
+* **IntersectionObserver Structural Virtualization:** Evaluates layout viewport intercepts asynchronously. Cards moving outside the target visibility bounding frames (`rootMargin: "400px"`) receive a performance-saving `contain-visibility: hidden` rule inside CSS through a custom class toggle to ensure that the browser's paint engine avoids calculating invisible geometric surfaces.
+* **Native Asynchronous Image Swapping:** Media images use an asynchronous encoding framework (`decoding="async"`) combined with data-attribute placeholder parameters, preventing rendering lockups when heavy asset rows move into view.
+* **Asynchronous Chunk-Streaming Engine:** Renders records smoothly in precise arrays of 20 elements via user interaction triggers, avoiding intensive bulk DOM insertion operations.
+* **Zero Jitter Compositor Mechanics:** Removed dynamic JavaScript scroll calculations entirely. Fixed layout elements run directly via GPU layer acceleration targets using the native browser compositing thread, avoiding all scroll latency or artificially introduced slowdowns.
+
+---
+
+## 📱 Responsive Layout Grid Architecture
+
+The catalog layout changes grid column density natively via CSS media queries. Card spacing scales fluidly to maximize viewing densities while maintaining complete text readability and interactive click areas across all device resolutions:
+
+| Display Target | Viewport Width Boundary | Grid Layout Density | Typography / Element Tweaks |
+| :--- | :--- | :--- | :--- |
+| **Enterprise Monitors** | Over `1200px` | **5 Columns Grid** | Standard 0.95rem Titles / 12px Card Padding |
+| **Laptops / Monitors** | `901px` to `1200px` | **4 Columns Grid** | Compact 16px Row Container Gaps |
+| **Tablet Form Factors** | `601px` to `900px` | **3 Columns Grid** | Header Padding Reductions, 14px Grid Gaps |
+| **Compact Mobile Viewports** | `381px` to `600px` | **Dense 2 Columns Grid** | Compact 0.85rem Titles / 6px Badges / 10px Padding |
+| **Ultra-Small Handsets** | Under `380px` | **Dense 2 Columns Grid** | Title scale-down protection (0.8rem) / 8px Gaps |
+
+---
+
+## 📊 Network Topology & Virtualization Map
+
+Below is the complete end-to-end blueprint tracking data routing across internet entry ports, local network firewalls, down into VirtualBox NAT network switches, and terminating inside the isolated Virtual Machine container:
+
+```
+🌐 WAN ACCESS INTERNET (gamedrop.duckdns.org)
+       │
+       ▼ [Public External Gateway IP: 88.24.76.106]
+┌────────────────────────────────────────────────────────┐
+│               MOVISTAR ROUTER ENGINE                   │
+│   Internal Gateway Address: 192.168.1.1                │
+│   Network DHCP Scopes Pool: 192.168.1.101 - 199        │
+│                                                        │
+│   ── Port Mapping Forward Rule: ───────────────────    │
+│   [Ext Port: 8443] ──> Forward To ──> [192.168.1.100:8443]
+└──────────────────────────┬─────────────────────────────┘
+                           │
+      ┌────────────────────┴────────────────────┐
+      ▼                                         ▼
+┌──────────────────────────┐              ┌─────────────────────────────────────┐
+│  STRONG WiFi Repeater    │              │         WINDOWS HOST MACHINE        │
+│  IP: 192.168.1.2         │              │  MAC Addr mapped via Router Lease   │
+│  (Moved outside Pool to  │              │  LAN Client Binding: 192.168.1.100  │
+│   eliminate Conflicts)   │              │  Firewall Rule: Allow 8443 Inbound  │
+└──────────────────────────┘              └──────────────────┬──────────────────┘
+                                                             │
+                                                             ▼
+                                          ┌─────────────────────────────────────┐
+                                          │     VIRTUALBOX HYPERVISOR SWITCH    │
+                                          │  NAT Mapping: Host Interface Bound  │
+                                          │                                     │
+                                          │  ── Port Forwarding Map Rules: ──   │
+                                          │  Host: 0.0.0.0:8443                 │
+                                          │  Guest: 10.0.2.15:443               │
+                                          └──────────────────┬──────────────────┘
+                                                             │
+                                                             ▼
+                                          ┌─────────────────────────────────────┐
+                                          │      GUEST OS: UBUNTU LINUXMINT     │
+                                          │  Virtual Internal IP: 10.0.2.15     │
+                                          │  Security Profile: UFW Active       │
+                                          │  Web Engine: Apache (Port 443/SSL)  │
+                                          └─────────────────────────────────────┘
 ```
 
-Finally, we restarted the PostgreSQL service and verified that the web server could successfully connect to the database using the IP address of the virtual machine hosting it.
-
-With this configuration, we managed to separate services across different virtual machines and simulate an architecture closer to a real-world environment.
-
-## STEPS: DAY 3
-
-> ⚠️ **READ ALL POINTS BEFORE DOING ANYTHING ELSE**
-
-## 📋 Prerequisites
-To move forward today, you must have completed the following from the previous session:
-* Selected the product to sell.
-* Defined the parameters that describe your product (name, description, image, and price).
-* Created the virtual machine with LinuxMint OS to host the database.
-* Installed and configured the database.
+The system network configurations map accurately across endpoints as documented below:
+* **Router Gateway:** 192.168.1.1 (Fixed)
+* **STRONG Repeater:** 192.168.1.2 (Static Mode)
+* **Windows Host Workstation:** 192.168.1.100 (DHCP Reservation / Static Lease)
+* **Ubuntu VM Guest (VirtualBox NAT Network Engine):** 10.0.2.15 (Internal Loopback Environment)
+* **Dynamic Client Pools:** 192.168.1.101 to 192.168.1.199 (Standard Local Scopes)
 
 ---
 
-## 🚀 Today is the big day!
+## 🛠️ Troubleshooting & Network Configuration Matrix
 
-We are going to scrape your chosen target pages using a Python program. We will also read from the database to populate the HTML.
+### Issue 1: Dynamic IP Conflicts on Host Machine
+* **Problem:** The Windows host workstation IP address shifted intermittently between `192.168.1.39` and `192.168.1.40`, completely breaking existing router port mapping definitions.
+* **Root Cause:** A high-power **STRONG WiFi Repeater** hardware device was occupying conflicting ranges dynamically inside the default router DHCP scope pool (`192.168.1.33-199`), triggering rapid lease renegotiation loops.
+* **Solution Implemented:**
+  1. **DHCP Reservation (Static Lease Assignment):** Entered the primary router configuration page via `192.168.1.1` -> Navigate to *LAN / Static Lease* -> Explicitly bound the Windows host system MAC address directly to IP destination `192.168.1.100`.
+  2. **DHCP Scope Modification:** Adjusted the router dynamic address allocation boundaries from `192.168.1.33-199` to `192.168.1.101-199`. This frees up IPs `192.168.1.2` through `192.168.1.100` for permanent static hardware mappings.
+  3. **Repeater Relocation:** Reconfigured the STRONG Repeater admin interface to use static configuration mode bound cleanly at `192.168.1.2`, isolating it outside the dynamic allocation boundary pool.
 
-### Remember! This involves two steps:
-1. A program to scrape data and save it to the database.
-2. A program to read from the database and populate the HTML.
+### Issue 2: VirtualBox NAT Network Isolation Overrides
+* **Problem:** The Apache web engine was locked within an isolated NAT sandbox context inside the Ubuntu Virtual Machine, making it unreachable to LAN devices and standard public requests.
+* **Symptoms:**
+  * `https://127.0.0.1:8443` -> ✅ Functional (Internal loopback testing successful)
+  * `https://192.168.1.100:8443` -> ❌ Execution Failure (Host IP connection dropped)
+  * `https://88.24.76.106:8443` -> ❌ Access Forbidden (External public request drop)
+* **Solution Implemented:** Configured VirtualBox software pipeline forwarding parameters to bridge incoming external host requests through to the virtual guest appliance.
+  * *Path:* VirtualBox Manager UI -> Select Target VM -> Settings -> Network -> Adapter 1 (NAT Mode) -> Port Forwarding Advanced Parameters Table.
 
-> 💡 **Note:** Before doing this, we must set up the Nginx web server to host the website.
+| Rule Name | Protocol | Host IP | Host Port | Guest IP | Guest Port |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Apache HTTPS** | TCP | `0.0.0.0` | `8443` | `10.0.2.15` | `443` |
 
-Let's get to work! ⚒ and...
+*Key Insight:* Apache handles listening operations inside the guest container on standard port `443`, while the host hypervisor maps traffic visibility externally on port `8443` to avoid service collisions on the main interface environment.
 
-📢 **!!! REMEMBER TO DOCUMENT THE ENTIRE PROCESS ON YOUR GITHUB SO THAT IT IS VISIBLE ON GITHUB PAGES !!!**
+### Issue 3: Windows Advanced Defender Firewall Dropping Port Traffic
+* **Problem:** Even after applying VirtualBox configuration layers, the host Windows security policies rejected incoming port validation requests sent on port `8443`.
+* **Solution Implemented:** Added global rule declarations through administrative PowerShell command execution blocks to permit secure traffic traversals:
+
+```powershell
+# Create persistent inbound hardware handling rules
+New-NetFirewallRule -DisplayName "GameDrop Apache Server Inbound" -Direction Inbound -LocalPort 8443 -Protocol TCP -Action Allow
+
+# Create corresponding outbound verification definitions
+New-NetFirewallRule -DisplayName "GameDrop Apache Server Outbound" -Direction Outbound -LocalPort 8443 -Protocol TCP -Action Allow
+```
+
+* **Verification Profile Test:**
+```powershell
+# Verify binding state properties directly on the active listener port
+Test-NetConnection -ComputerName localhost -Port 8443
+```
+
+### Issue 4: Outdated Router Port Assignment Maps
+* **Problem:** The primary internet router's port map references pointed to historical, dead IP values because of initial DHCP leasing conflicts.
+* **Solution Implemented:** 1. Access the edge gateway control system at `192.168.1.1` -> Access *NAT Routing Options / Port Mapping Matrix*.
+  2. Deleted broken rules and initialized a clean record mapping rule named `Apache-HTTPS` pointing to destination `192.168.1.100`.
+
+| Service / Mapping Name | External Port | Target Internal Destination IP | Private/Internal Port | Protocol Configuration |
+| :--- | :--- | :--- | :--- | :--- |
+| **Apache-HTTPS** | `8443` | `192.168.1.100` | `8443` | **TCP Only** |
+
+### Issue 5: External Address Modification Controls & DuckDNS Integration
+* **Problem:** Dynamic Public IP allocations from the carrier provider (Movistar) shift unpredictably, causing external endpoints to lose connectivity.
+* **Solution Implemented:** Activated automated cloud mapping trackers using the DuckDNS system protocol.
+  * *Target Dynamic Address:* `gamedrop.duckdns.org`
+  * *Update Automation Execution Script:* Managed via file layout `/usr/local/bin/duckdns-update.sh` containing:
+
+```bash
+#!/bin/bash
+# Query endpoint validation loop to keep records synchronized with DuckDNS
+curl -s "[https://www.duckdns.org/update?domains=gamedrop&token=YOUR_SECRET_DUCKDNS_TOKEN&ip=](https://www.duckdns.org/update?domains=gamedrop&token=YOUR_SECRET_DUCKDNS_TOKEN&ip=)" >> /var/log/duckdns.log 2>&1
+```
+
+* *Cron Automation Schedule:* Installed inside system root cron tasks to trigger every 5 minutes:
+```bash
+# Append tracking task inside system crontab configurations via 'sudo crontab -e'
+*/5 * * * * /bin/bash /usr/local/bin/duckdns-update.sh
+```
+
+* **Execution Verification Verification:**
+```bash
+# Run manual validation checklist evaluations directly from shell terminal windows
+cat /var/log/duckdns.log
+```
+
+### Issue 6: Browser SSL Certificate Validation Alerts
+* **Problem:** Local self-signed SSL configurations displayed strict warnings ("Connection Not Secure"), halting standard traffic.
+* **Solution Implemented:** Issued an official certificate package from Let's Encrypt validation authorities via `certbot` modules:
+
+```bash
+# Execute automated multi-domain challenge validation verification parameters
+sudo certbot --apache -d gamedrop.duckdns.org
+```
+
+### Issue 7: Browser HSTS Cache Jams
+* **Problem:** After applying valid SSL validation structures, standard testing software windows continued to load cached self-signed certificate data due to strict HSTS internal rules.
+* **Solution Implemented:**
+  1. Entered the internal control utility inside Google Chrome at URL: `chrome://net-internals/#hsts`
+  2. Scrolled down to the *Delete domain security policies* section input container.
+  3. Submitted the targeted test route (`gamedrop.duckdns.org`) and restarted browser processing threads.
+
+### Issue 8: Host Server Infrastructure Hardening Strategy
+* **Solution Implemented:** Hardened the exposed Linux network interface through three coordinated layers:
+
+```bash
+# Layer 1: Establish Fail2Ban automated attack tracking definitions
+sudo apt-get install fail2ban -y
+sudo systemctl enable fail2ban --now
+
+# Layer 2: Lock down target local input profiles using Uncomplicated Firewall (UFW)
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 8443/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+```
+
+* **Layer 3: Disable Apache Footprint Disclosures:** Edited `/etc/apache2/conf-enabled/security.conf` configuration lines to prevent signature disclosures to scanners:
+```apache
+ServerTokens Prod
+ServerSignature Off
+```
 
 ---
 
-## 🛠️ Step-by-Step: Today's Session
+## 🎯 Production Access Matrix Reference
 
-### 1. Web Server
-* Install and configure the Nginx web server on the VM you created for this purpose. Go ahead!
-
-### 2. Introduction to Scraping
-Let's move on to scraping... get familiar with the following tools:
-* **Requests:** To make HTTP requests to the web pages.
-* **Beautiful Soup:** To parse (extract) data from HTML.
-* **Selenium:** To handle pages with dynamic interaction (like JavaScript).
-
-### 3. Python Development
-Now we will create **2 Python applications**. Create the necessary folder structure to develop both applications:
-
-#### A. Scraping Application
-* Using the knowledge gained from Requests, Beautiful Soup, and Selenium, create a Python application that retrieves your desired products from the websites you chose at the beginning.
-* The data will be stored in the database.
-
-#### B. HTML Population Application
-* Create a Python application that reads from the database and populates the website hosted on Nginx.
+| Access Topology | Target Connection Endpoint Path | Operational Verification Status |
+| :--- | :--- | :--- |
+| **Local Host VM View** | `https://127.0.0.1:8443` | ✅ System Active / Verified |
+| **Local Area Network (LAN)** | `https://192.168.1.100:8443` | ✅ System Active / Verified |
+| **External Internet WAN (Direct IP)** | `https://88.24.76.106:8443` | ✅ System Active / Verified |
+| **External Internet WAN (DNS Name)** | `https://gamedrop.duckdns.org:8443` | ✅ System Active / Verified |
 
 ---
 
-## 📦 DELIVERY
-
-Create a **PDF** containing evidence of:
-* Nginx configuration.
-* URLs with links to the repositories where the code for both Python applications can be reviewed.
-* URL of the documentation.
-* Screenshots of your website showing the products.
-
----
----
-## STEPS: DAY 4
-
-> ⚠️ **READ ALL POINTS BEFORE DOING ANYTHING ELSE**
-
-## 📋 Prerequisites
-To move forward today, you must have completed the following from the previous session:
-* Selected the product to sell.
-* Defined the parameters that describe your product (name, description, image, and price).
-* Created the virtual machine with LinuxMint OS to host the database.
-* Installed and configured the database.
-* Developed the Python web scraping application and saved the data to the database.
-* Developed the application to read from the database and populate the HTML.
-
-> 📝 **NOTE:** Apparently, during the last session, not all groups had enough time to finish the application that reads the database and populates your website.
-> 
-> I have opened "Day 27 Assignment" so you can replace your submitted work. This ensures the assignment has both complete scripts so the Rubric can be applied correctly.
-> 
-> **Great! Finish this part before moving on.**
-
----
-
-## 🤖 Today's Challenge: Can AI Help Us?
-
-At this point... do you think AI could have helped us with scraping? **Watch out!** Not by writing the Python code, but by doing the scraping for you and saving the data into a JSON file. Let's do it!
-
-### 🗓️ Daily Schedule (2 Sessions)
-
-#### Session 1: Scraping with AI (Prompt Engineering)
-* **Objective:** Write a prompt to make the AI scrape your target website and save the data into a JSON file.
-* **Process:** Iterate and improve the prompt until the AI populates the JSON exactly as you expect.
-* **Delivery:** Upload the prompt as a `.md` file and the resulting JSON file to the assignment portal.
-
-#### Session 2: Design and Style
-* **Objective:** Continue developing the HTML and apply CSS styling to your web store.
-
+## 📄 License & Terms
+This repository is open-source software distributed under the terms of the **GNU General Public License Version 3, 29 June 2007**. See the included [`LICENSE.txt`](LICENSE) file inside the root repository structure for complete authorization details.
