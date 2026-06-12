@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>GameDrop // Best Gaming Deals & Discounts</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+    <header class="header-wrapper">
+        <div class="header-content">
+            <div class="brand-section">
+                <h1 class="main-title">Game<span>Drop</span></h1>
+                <p class="subtitle">The most brutal gaming discounts on the internet in real-time</p>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="global-search" placeholder="Search a game by title..." autocomplete="off">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="controls-panel">
+        <div class="filter-group">
+            <label for="price-range">Max Price: <span id="price-display">0.00</span>€</label>
+            <input type="range" id="price-range" min="0" max="100" step="1" value="100">
+        </div>
+        <div class="sort-group">
+            <label for="price-sort">Sort by Price:</label>
+            <select id="price-sort">
+                <option value="none">Default (Featured)</option>
+                <option value="asc">Price: Low to High</option>
+                <option value="desc">Price: High to Low</option>
+            </select>
+        </div>
+    </section>
+
+    <div class="container">
+        <main class="games-grid" id="catalog-container"></main>
+        
+        <div class="no-results" id="no-results-msg" style="display: none;">
+            <p>No games match your selected criteria.</p>
+        </div>
+
+        <div class="load-more-container">
+            <button id="load-more-btn" class="load-more-btn" style="display: none;">Want More Games</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 <strong>GameDrop</strong>. All rights reserved.</p>
+            <p>Powered by PostgreSQL, Apache & CheapShark API.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("catalog-container");
+            const priceRange = document.getElementById("price-range");
+            const priceDisplay = document.getElementById("price-display");
+            const priceSort = document.getElementById("price-sort");
+            const globalSearch = document.getElementById("global-search");
+            const noResultsMsg = document.getElementById("no-results-msg");
+            const loadMoreBtn = document.getElementById("load-more-btn");
+
+            const CHUNK_SIZE = 20;
+            let currentIndex = 0;
+            let cachedDataset = [];
+            let filteredDataset = [];
+            let virtualizedCards = [];
+
+            // Highly performant observer tracking layout states
+            const cardVisibilityObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const img = entry.target.querySelector('img');
+                    if (entry.isIntersecting) {
+                        if (img && img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        entry.target.classList.remove("render-offscreen");
+                    } else {
+                        entry.target.classList.add("render-offscreen");
+                    }
+                });
+            }, { rootMargin: "400px 0px" });
+
+            // Fetch backend compiled json asset directly
+            fetch('assets/data/deals.json')
+                .then(response => response.json())
+                .then(data => {
+                    cachedDataset = data;
+                    initializeCatalog();
+                }).catch(() => {
+                    container.innerHTML = `<p class="no-results">Error executing asset lookup sync pipelines.</p>`;
+                });
+
+            function initializeCatalog() {
+                if (!cachedDataset.length) return;
+
+                let prices = cachedDataset.map(d => d.price);
+                let maxP = Math.ceil(Math.max(...prices));
+                let minP = Math.floor(Math.min(...prices));
+
+                priceRange.min = minP;
+                priceRange.max = maxP;
+                priceRange.value = maxP;
+                priceDisplay.textContent = maxP.toFixed(2);
+
+                filterAndSortPipeline();
+            }
+
+            function filterAndSortPipeline() {
+                const maxPrice = parseFloat(priceRange.value);
+                const query = globalSearch.value.toLowerCase().trim();
+
+                // Native rapid filtering inside local runtime memory array segments
+                filteredDataset = cachedDataset.filter(item => {
+                    return item.price <= maxPrice && item.title.toLowerCase().includes(query);
+                });
+
+                const sortOrder = priceSort.value;
+                if (sortOrder === "asc") {
+                    filteredDataset.sort((a, b) => a.price - b.price);
+                } else if (sortOrder === "desc") {
+                    filteredDataset.sort((a, b) => b.price - a.price);
+                }
+
+                currentIndex = 0;
+                virtualizedCards.forEach(c => cardVisibilityObserver.unobserve(c.el));
+                virtualizedCards = [];
+                container.innerHTML = "";
+
+                if (!filteredDataset.length) {
+                    noResultsMsg.style.display = 'block';
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    noResultsMsg.style.display = 'none';
+                    renderNextChunk();
+                }
+            }
+
+            function renderNextChunk() {
+                const fragment = document.createDocumentFragment();
+                const targetEndIndex = Math.min(currentIndex + CHUNK_SIZE, filteredDataset.length);
+                const currentChunk = filteredDataset.slice(currentIndex, targetEndIndex);
+
+                currentChunk.forEach(deal => {
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    const savings = Math.round(deal.savings);
+
+                    card.innerHTML = `
+                        <div class="card-img-container">
+                            <img data-src="${deal.image}" alt="${deal.title}" decoding="async">
+                            ${savings > 0 ? `<div class="savings-badge">-${savings}%</div>` : ''}
+                        </div>
+                        <div class="card-content">
+                            <h2 class="game-title" title="${deal.title}">${deal.title}</h2>
+                            <div class="store-info">${deal.store_name}</div>
+                            <div class="price-row">
+                                <span class="current-price">€${deal.price.toFixed(2)}</span>
+                                <span class="retail-price">€${deal.retail_price.toFixed(2)}</span>
+                            </div>
+                            <a href="${deal.url}" target="_blank" rel="noopener noreferrer" class="buy-btn">Claim Loot</a>
+                        </div>
+                    `;
+
+                    fragment.appendChild(card);
+                    cardVisibilityObserver.observe(card);
+                    virtualizedCards.push({ el: card });
+                });
+
+                container.appendChild(fragment);
+                currentIndex = targetEndIndex;
+
+                if (currentIndex >= filteredDataset.length) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                }
+            }
+
+            loadMoreBtn.addEventListener("click", renderNextChunk);
+
+            function debounce(fn, delay) {
+                let timer;
+                return function(...args) {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(this, args), delay);
+                }
+            }
+
+            priceRange.addEventListener("input", () => {
+                priceDisplay.textContent = parseFloat(priceRange.value).toFixed(2);
+            });
+            priceRange.addEventListener("change", filterAndSortPipeline);
+            priceSort.addEventListener("change", filterAndSortPipeline);
+            globalSearch.addEventListener("input", debounce(filterAndSortPipeline, 120));
+        });
+    </script>
+</body>
+</html>
